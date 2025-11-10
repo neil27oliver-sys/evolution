@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promo Test: Opening Portal</title>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: #000; 
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            flex-direction: column; 
+        }
+        video { 
+            width: 100vw; 
+            height: 100vh; 
+            object-fit: cover; 
+        }
+        button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        button:hover { background: rgba(255,255,255,1); }
+        button { animation: fadeIn 0.5s 2s forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <video id="openingVid" autoplay muted playsinline loop="false" preload="metadata">
+        <source src="opening.mp4" type="video/mp4">
+        <p>Loading portal...</p>
+    </video>
+    <button onclick="redirectToKindle()">Unlock Kindle Now</button>
+
+    <script>
+        const video = document.getElementById('openingVid');
+        const kindleUrl = 'https://a.co/d/iGZFg8r?utm_source=oracle_test&utm_campaign=nov_promo';  // Kindle zap + tracking
+        
+        // Force play on load (local fix)
+        video.addEventListener('loadedmetadata', () => {
+            video.play().catch(e => console.log('Autoplay nudge:', e));
+            setTimeout(() => {
+                console.log('Kindle timer fired—zapping');
+                window.location.href = kindleUrl;
+            }, (video.duration || 5) * 1000);  // Dynamic buffer for your 3s clip
+        });
+        
+        video.addEventListener('ended', () => {
+            console.log('Opening ended—zapping to Kindle');
+            window.location.href = kindleUrl;
+        });
+        
+        video.addEventListener('error', (e) => {
+            console.error('Vid error:', e);
+            setTimeout(() => window.location.href = kindleUrl, 3000);
+        });
+        
+        function redirectToKindle() {
+            window.location.href = kindleUrl;
+        }
+        
+        // Max fallback: 10s
+        setTimeout(() => {
+            if (!video.ended) {
+                console.log('Timeout zap to Kindle');
+                window.location.href = kindleUrl;
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
