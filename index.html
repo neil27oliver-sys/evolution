@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Promo Test: Opening Portal</title>
-    <!-- X Player Card Metas: Makes link render as embedded vid player in tweet -->
+    <!-- X Player Card Metas: Embedded vid player in tweet -->
     <meta name="twitter:card" content="player">
     <meta name="twitter:player" content="https://neil27oliver-sys.github.io/evolution/">
     <meta name="twitter:player:width" content="480">
@@ -13,7 +13,7 @@
     <meta name="twitter:stream:type" content="video/mp4">
     <meta name="twitter:site" content="@NeilOliver1640">
     <meta name="twitter:creator" content="@NeilOliver1640">
-    <!-- Fallback OG for other shares -->
+    <!-- Fallback OG -->
     <meta property="og:video" content="https://neil27oliver-sys.github.io/evolution/opening.mp4">
     <meta property="og:video:type" content="video/mp4">
     <meta property="og:video:width" content="480">
@@ -29,11 +29,15 @@
             align-items: center; 
             height: 100vh; 
             flex-direction: column; 
+            position: fixed; /* Locks to viewport, no scroll */
+            top: 0; left: 0; right: 0; bottom: 0;
         }
         video { 
             width: 100vw; 
             height: 100vh; 
             object-fit: cover; 
+            position: absolute; /* Overlays full, no gaps */
+            top: 0; left: 0;
         }
         button {
             position: absolute;
@@ -48,10 +52,15 @@
             font-size: 16px;
             opacity: 0;
             transition: opacity 0.3s;
+            z-index: 10; /* Above vid */
         }
         button:hover { background: rgba(255,255,255,1); }
         button { animation: fadeIn 0.5s 2s forwards; }
         @keyframes fadeIn { to { opacity: 1; } }
+        /* Hide button in full-screen mode */
+        :-webkit-full-screen button { display: none; }
+        :-moz-full-screen button { display: none; }
+        :fullscreen button { display: none; }
     </style>
 </head>
 <body>
@@ -65,13 +74,21 @@
         const video = document.getElementById('openingVid');
         const kindleUrl = 'https://a.co/d/iGZFg8r?utm_source=oracle_test&utm_campaign=nov_promo';  // Kindle zap + tracking
         
-        // Force play on load (local fix)
+        // Force play & full-screen on load
         video.addEventListener('loadedmetadata', () => {
             video.play().catch(e => console.log('Autoplay nudge:', e));
+            // Request full-screen (works on muted autoplay; fallback if blocked)
+            if (video.requestFullscreen) {
+                video.requestFullscreen().catch(e => console.log('Full-screen nudge:', e));
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.mozRequestFullScreen) {
+                video.mozRequestFullScreen();
+            }
             setTimeout(() => {
                 console.log('Kindle timer fired—zapping');
                 window.location.href = kindleUrl;
-            }, (video.duration || 5) * 1000);  // Dynamic buffer for your 3s clip
+            }, (video.duration || 5) * 1000);  // Dynamic buffer for 3s clip
         });
         
         video.addEventListener('ended', () => {
